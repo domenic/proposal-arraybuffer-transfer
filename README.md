@@ -70,9 +70,9 @@ function validateAndWriteSafeAndFast(arrayBuffer) {
 
 Now attempts to modify an `ArrayBuffer` after passing it to `validateAndWriteSafeAndFast()` will throw, making it clear that the function has taken ownership of the data and does not expect further modification of it.
 
-## Optional, more advanced use cases: resizing array buffers
+## More advanced use cases: resizing array buffers
 
-As an optional extension, we propose adding arguments `byteOffset` and `byteLength` to transfer. These would cause the newly-returned `ArrayBuffer` to only contain the contents of the original starting at `byteOffset`, and of length `byteLength`, zero-padding if `byteOffset + byteLength` is greater than the `ArrayBuffer`'s length.
+As an extension, we propose adding arguments `byteOffset` and `byteLength` to transfer. These would cause the newly-returned `ArrayBuffer` to only contain the contents of the original starting at `byteOffset`, and of length `byteLength`, zero-padding if `byteOffset + byteLength` is greater than the `ArrayBuffer`'s length.
 
 This allows a number of scenarios:
 
