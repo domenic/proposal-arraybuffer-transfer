@@ -104,3 +104,5 @@ It doesn't really make sense to add `transfer()` to `SharedArrayBuffer.prototype
 ## History and acknowledgments
 
 This proposal derives from Luke Wagner's [`ArrayBuffer.transfer`](https://gist.github.com/lukewagner/2735af7eea411e18cf20) strawperson, adding the possible `offset` argument. That in turn derives from a suggestion of Dmitry Lomov. Thanks to them both!
+
+At that time one of the major envisioned use cases for the proposal was to provide resizable memory for asm.js. That use case has largely been subsumed by WebAssembly, and so the proposal was abandoned. I picked it up because I believe there is still a strong use case for detaching and transferring `ArrayBuffer`s even in pure JavaScript code.
