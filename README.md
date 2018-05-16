@@ -105,6 +105,8 @@ const bytesRead = await file.readInto(tempBuffer, 0, tempBuffer.byteLength);
 const buffer = tempBuffer.realloc(bytesRead);
 ```
 
+This API is less important than the `transfer()` API, and I look forward to the committee's feedback as to whether we should pursue it or not.
+
 ## FAQs
 
 ### What about SharedArrayBuffer?
