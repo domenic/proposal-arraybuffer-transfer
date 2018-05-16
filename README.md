@@ -70,29 +70,39 @@ function validateAndWriteSafeAndFast(arrayBuffer) {
 
 Now attempts to modify an `ArrayBuffer` after passing it to `validateAndWriteSafeAndFast()` will throw, making it clear that the function has taken ownership of the data and does not expect further modification of it.
 
-## More advanced use cases: resizing array buffers
+As a bonus, you can use this for providing a strong signal to the engine that it can free an `ArrayBuffer`'s memory, without needing to find all references to the `ArrayBuffer` object and null them out:
 
-As an extension, we propose adding arguments `byteOffset` and `byteLength` to transfer. These would cause the newly-returned `ArrayBuffer` to only contain the contents of the original starting at `byteOffset`, and of length `byteLength`, zero-padding if `byteOffset + byteLength` is greater than the `ArrayBuffer`'s length.
+```js
+arrayBuffer.transfer(); // don't save the result anywhere
+```
 
-This allows a number of scenarios:
+## Bonus proposal: `ArrayBuffer.prototype.realloc(newByteLength)
 
-* Deterministically allowing the implementation to release all the memory of the `ArrayBuffer`, with `ab.transfer(0, 0)`.
-* Deterministically allowing the implementation to release some of the memory of the `ArrayBuffer`, with `ab.transfer(x, y)` where `x - y < ab.byteLength`.
-* Growing an array buffer without copying, with `ab.transfer(0, ab.byteLength + x)`.
+As a secondary API, while we're in the area, we propose a related API, called `realloc()`. This transfers the contents of the `ArrayBuffer` into a new one with a new length. It is expected to have similar semantics to the [C `realloc()` function](http://en.cppreference.com/w/c/memory/realloc), allowing in-place expansion or contraction when possible.
 
-For an example of how this could be useful, consider reading a file. You are given a low-level system API `file.readInto(buffer, offset, count)` that attempts to read `count` bytes from `file` into `buffer` starting at `offset`, and resolves with a promise for the number of bytes read:
+The main use case for this is trimming an `ArrayBuffer` without performing a copy.
+
+For example, consider reading a file. You are given a low-level system API `file.readInto(buffer, offset, count)` that attempts to read `count` bytes from `file` into `buffer` starting at `offset`, and resolves with a promise for the number of bytes read:
 
 ```js
 const buffer = new ArrayBuffer(1024 * 1024);
-const bytesRead = file.readInto(buffer, 0, buffer.byteLength);
+const bytesRead = await file.readInto(buffer, 0, buffer.byteLength);
 ```
 
-If the file is small, `bytesRead` might be much less than 1 MiB, and so you're wasting memory. With `ArrayBuffer.prototype.transfer()`, you can quickly clean that up:
+If the file is small, `bytesRead` might be much less than 1 MiB, and so you're wasting memory. You could fix this, but it would require a costly copy:
 
 ```js
 const tempBuffer = new ArrayBuffer(1024 * 1024);
-const bytesRead = file.readInto(tempBuffer, 0, tempBuffer.byteLength);
-const buffer = tempBuffer.transfer(0, bytesRead);
+const bytesRead = await file.readInto(tempBuffer, 0, tempBuffer.byteLength);
+const buffer = tempBuffer.slice(0, bytesRead);
+```
+
+But with `ArrayBuffer.prototype.realloc()`, you can (at the implementation's discretion) avoid the copy:
+
+```js
+const tempBuffer = new ArrayBuffer(1024 * 1024);
+const bytesRead = await file.readInto(tempBuffer, 0, tempBuffer.byteLength);
+const buffer = tempBuffer.realloc(bytesRead);
 ```
 
 ## FAQs
@@ -103,6 +113,6 @@ It doesn't really make sense to add `transfer()` to `SharedArrayBuffer.prototype
 
 ## History and acknowledgments
 
-This proposal derives from Luke Wagner's [`ArrayBuffer.transfer`](https://gist.github.com/lukewagner/2735af7eea411e18cf20) strawperson, adding the possible `offset` argument. That in turn derives from a suggestion of Dmitry Lomov. Thanks to them both!
+This proposal derives from Luke Wagner's [`ArrayBuffer.transfer`](https://gist.github.com/lukewagner/2735af7eea411e18cf20) strawperson, split into two distinct methods: `transfer()` and `realloc()`. That strawperson in turn derives from a suggestion of Dmitry Lomov. Thanks to them both!
 
-At that time one of the major envisioned use cases for the proposal was to provide resizable memory for asm.js. That use case has largely been subsumed by WebAssembly, and so the proposal was abandoned. I picked it up because I believe there is still a strong use case for detaching and transferring `ArrayBuffer`s even in pure JavaScript code.
+At that time one of the major envisioned use cases for the proposal was to provide resizable memory for asm.js. That use case has largely been subsumed by WebAssembly, and so the proposal was abandoned. I picked it up because I believe there is still a strong use case for transferring and trimming `ArrayBuffer`s even in pure JavaScript code.
