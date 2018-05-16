@@ -80,7 +80,7 @@ arrayBuffer.transfer(); // don't save the result anywhere
 
 As a secondary API, while we're in the area, we propose a related API, called `realloc()`. This transfers the contents of the `ArrayBuffer` into a new one with a new length. It is expected to have similar semantics to the [C `realloc()` function](http://en.cppreference.com/w/c/memory/realloc), allowing in-place expansion or contraction when possible.
 
-The main use case for this is trimming an `ArrayBuffer` without performing a copy.
+The main use case for this is trimming an `ArrayBuffer`, while avoiding copies when possible.
 
 For example, consider reading a file. You are given a low-level system API `file.readInto(buffer, offset, count)` that attempts to read `count` bytes from `file` into `buffer` starting at `offset`, and resolves with a promise for the number of bytes read:
 
@@ -89,7 +89,7 @@ const buffer = new ArrayBuffer(1024 * 1024);
 const bytesRead = await file.readInto(buffer, 0, buffer.byteLength);
 ```
 
-If the file is small, `bytesRead` might be much less than 1 MiB, and so you're wasting memory. You could fix this, but it would require a costly copy:
+If the file is small, `bytesRead` might be much less than 1 MiB, and so you're wasting memory. You could fix this, but it would require a copy:
 
 ```js
 const tempBuffer = new ArrayBuffer(1024 * 1024);
@@ -97,13 +97,15 @@ const bytesRead = await file.readInto(tempBuffer, 0, tempBuffer.byteLength);
 const buffer = tempBuffer.slice(0, bytesRead);
 ```
 
-But with `ArrayBuffer.prototype.realloc()`, you can (at the implementation's discretion) avoid the copy:
+But with `ArrayBuffer.prototype.realloc()`, the implementation may be able to avoid the copy:
 
 ```js
 const tempBuffer = new ArrayBuffer(1024 * 1024);
 const bytesRead = await file.readInto(tempBuffer, 0, tempBuffer.byteLength);
 const buffer = tempBuffer.realloc(bytesRead);
 ```
+
+If implementation conditions align correctly, no copies are performed here: `buffer` points to the same region of memory as `tempBuffer`, but now any bytes between `bytesRead` and `1024 * 1024` are freed, since they can be accessed neither via `buffer` (whose length is `bytesRead`) nor via `tempBuffer` (which is now detached).
 
 This API is less important than the `transfer()` API, and I look forward to the committee's feedback as to whether we should pursue it or not.
 
