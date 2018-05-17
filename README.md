@@ -76,7 +76,7 @@ As a bonus, you can use this for providing a strong signal to the engine that it
 arrayBuffer.transfer(); // don't save the result anywhere
 ```
 
-## Bonus proposal: `ArrayBuffer.prototype.realloc(newByteLength)
+## Bonus proposal: `ArrayBuffer.prototype.realloc(newByteLength)`
 
 As a secondary API, while we're in the area, we propose a related API, called `realloc()`. This transfers the contents of the `ArrayBuffer` into a new one with a new length. It is expected to have similar semantics to the [C `realloc()` function](http://en.cppreference.com/w/c/memory/realloc), allowing in-place expansion or contraction when possible.
 
@@ -106,6 +106,8 @@ const buffer = tempBuffer.realloc(bytesRead);
 ```
 
 If implementation conditions align correctly, no copies are performed here: `buffer` points to the same region of memory as `tempBuffer`, but now any bytes between `bytesRead` and `1024 * 1024` are freed, since they can be accessed neither via `buffer` (whose length is `bytesRead`) nor via `tempBuffer` (which is now detached).
+
+I mainly envision this being used as an alternative for `tempBuffer.slice(0, bytesRead)` that developers can use whenever they want to resize, and don't need two copies of the data lying around. In that case they can just use `realloc()` and perhaps get a performance or memory improvement if the engine is in a good position to optimize.
 
 This API is less important than the `transfer()` API, and I look forward to the committee's feedback as to whether we should pursue it or not.
 
