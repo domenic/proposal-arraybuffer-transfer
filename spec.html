@@ -22,12 +22,11 @@ contributors: Domenic Denicola
     1. If _O_ does not have an [[ArrayBufferData]] internal slot, throw a *TypeError* exception.
     1. If IsSharedArrayBuffer(_O_) is *true*, throw a *TypeError* exception.
     1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception.
-    1. Let _sourceBlock_ be _O_.[[ArrayBufferData]].
-    1. Let _sourceLength_ be _O_.[[ArrayBufferByteLength]].
     1. Let _ctor_ be ? SpeciesConstructor(_O_, %ArrayBuffer%).
     1. Let _dest_ be ? OrdinaryCreateFromConstructor(_ctor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
-    1. Set _dest_.[[ArrayBufferData]] to _sourceBlock_.
-    1. Set _dest_.[[ArrayBufferByteLength]] to _sourceLength_.
+    1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception. (NOTE: side effects of the above steps may have detached _O_.)
+    1. Set _dest_.[[ArrayBufferData]] to _O_.[[ArrayBufferData]].
+    1. Set _dest_.[[ArrayBufferByteLength]] to _O_.[[ArrayBufferByteLength]].
     1. Perform ? DetachArrayBuffer(_O_).
     1. Return _dest_.
   </emu-alg>
@@ -45,6 +44,7 @@ contributors: Domenic Denicola
     1. Set _newByteLength_ to ? ToIndex(_newByteLength_).
     1. Let _ctor_ be ? SpeciesConstructor(_O_, %ArrayBuffer%).
     1. Let _dest_ be ? OrdinaryCreateFromConstructor(_ctor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
+    1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception. (NOTE: side effects of the above steps may have detached _O_.)
     1. Let _destBlock_ be a new zero-length Data Block value.
     1. If _newByteLength_ is not 0, then
       1. Let _sourceBlock_ be _O_.[[ArrayBufferData]].
