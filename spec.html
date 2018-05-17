@@ -25,7 +25,7 @@ contributors: Domenic Denicola
     1. Let _sourceBlock_ be _O_.[[ArrayBufferData]].
     1. Let _sourceLength_ be _O_.[[ArrayBufferByteLength]].
     1. Let _ctor_ be ? SpeciesConstructor(_O_, %ArrayBuffer%).
-    1. Let _dest_ be ? OrdinaryCreateFromConstructor(_constructor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
+    1. Let _dest_ be ? OrdinaryCreateFromConstructor(_ctor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
     1. Set _dest_.[[ArrayBufferData]] to _sourceBlock_.
     1. Set _dest_.[[ArrayBufferByteLength]] to _sourceLength_.
     1. Perform ? DetachArrayBuffer(_O_).
@@ -44,7 +44,7 @@ contributors: Domenic Denicola
     1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception.
     1. Set _newByteLength_ to ? ToIndex(_newByteLength_).
     1. Let _ctor_ be ? SpeciesConstructor(_O_, %ArrayBuffer%).
-    1. Let _dest_ be ? OrdinaryCreateFromConstructor(_constructor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
+    1. Let _dest_ be ? OrdinaryCreateFromConstructor(_ctor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
     1. Let _destBlock_ be a new zero-length Data Block value.
     1. If _newByteLength_ is not 0, then
       1. Let _sourceBlock_ be _O_.[[ArrayBufferData]].
