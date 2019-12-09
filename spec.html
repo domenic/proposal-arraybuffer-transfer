@@ -41,16 +41,16 @@ contributors: Domenic Denicola
     1. If _O_ does not have an [[ArrayBufferData]] internal slot, throw a *TypeError* exception.
     1. If IsSharedArrayBuffer(_O_) is *true*, throw a *TypeError* exception.
     1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception.
-    1. Set _newByteLength_ to ? ToIndex(_newByteLength_).
+    1. Let _destLength_ be ? ToIndex(_newByteLength_).
     1. Let _ctor_ be ? SpeciesConstructor(_O_, %ArrayBuffer%).
     1. Let _dest_ be ? OrdinaryCreateFromConstructor(_ctor_, `"%ArrayBufferPrototype%"`, &laquo; [[ArrayBufferData]], [[ArrayBufferByteLength]], [[ArrayBufferDetachKey]] &raquo;).
     1. If IsDetachedBuffer(_O_) is *true*, throw a *TypeError* exception. (NOTE: side effects of the above steps may have detached _O_.)
     1. Let _destBlock_ be a new zero-length Data Block value.
-    1. If _newByteLength_ is not 0, then
+    1. If _destLength_ is not 0, then
       1. Let _sourceBlock_ be _O_.[[ArrayBufferData]].
       1. Let _sourceLength_ be _O_.[[ArrayBufferByteLength]].
-      1. Let _sourceEnd_ be min(_sourceLength_, _newByteLength_) &minus; 1.
-      1. Set _destBlock_ to a new Data Block value consisting of _newByteLength_ bytes, with the bytes in positions 0 through _sourceEnd_, inclusive, having the same values as those in _sourceBlock_ at positions 0 through _sourceEnd_, inclusive. Any subsequent bytes must be set to 0. If it is impossible to create such a Data Block, throw a *RangeError* exception.
+      1. Let _sourceEnd_ be min(_sourceLength_, _destLength_) &minus; 1.
+      1. Set _destBlock_ to a new Data Block value consisting of _destLength_ bytes, with the bytes in positions 0 through _sourceEnd_, inclusive, having the same values as those in _sourceBlock_ at positions 0 through _sourceEnd_, inclusive. Any subsequent bytes must be set to 0. If it is impossible to create such a Data Block, throw a *RangeError* exception.
       <emu-note>It is expected that implementations will try to reuse the same backing memory for the bytes shared between _sourceBlock_ and _destBlock_, when possible, since after this method completes _sourceBlock_ will be otherwise inaccessible. This will not always be the case, and sometimes a copy will be necessary.</emu-note>
     1. Set _dest_.[[ArrayBufferData]] to _destBlock_.
     1. Set _dest_.[[ArrayBufferByteLength]] to _destLength_.
